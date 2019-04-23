@@ -6,20 +6,11 @@ from hashlib import md5
 import matplotlib.pyplot as plt
 import multiprocessing
 from threading import Thread, Lock
+from helper import getPercentOfImageSize, filter_files, deleteFileFromDirectory
 
 mutex = Lock()
-
 numberOfThreads = 20
 imgTupleWithPercentList = []
-acceptedExt = ['jpg', 'jpeg','png','bmp', "tiff",'JPG']
-
-def filter_files(filenames):
-    acceptedFiles = []
-    for fname in filenames:
-        ext = (fname.split('.'))[-1]
-        if ext in acceptedExt: 
-            acceptedFiles.append(fname)
-    return acceptedFiles
 
 def normalCurveFunction(variance , segment):
     points = []
@@ -31,10 +22,6 @@ def normalCurveFunction(variance , segment):
         points.append((x,y))
         y_sum += y  
     return points, y_sum
-
-def getPercentOfImageSize(image, percent):
-    h, w = image.size
-    return (int(h * (percent/100)), int(w * (percent/100)))
 
 def identifyExactDuplicates(imageList):
     imageHashDict = {}
@@ -121,7 +108,6 @@ def processingImagesWithMultiprocessing(imFileNames, approach, threshold, imgTup
     print(len(similarityTupleList))
     return processingImagesWithMultiprocessing(imFileNames[1:], approach, threshold, imgTupleWithPercentList)
 
-
 def processingSimilarity(imFileNames, approach, threshold):
     imgCount = len(imFileNames)
     if imgCount < 1:
@@ -137,10 +123,6 @@ def processingSimilarity(imFileNames, approach, threshold):
             imgTupleWithPercentList.append(similarityTuple)
 
     return processingSimilarity(imFileNames[1:], approach, threshold)
-
-def deleteFileFromDirectory(dir,images):
-    for im in images:
-        os.remove(dir+im)
 
 def generatingJsonWithThreshold(imgsWithPercentList, threshold):
     finalJSON = {}
@@ -173,64 +155,3 @@ def driverFunction(imFilePATH, approach, threshold, multiprocessingFlag, fileDel
         finalJSON = processingImagesWithMultiprocessing(imFileNames, approach, threshold, imgTupleWithPercentList)
         
     return finalJSON
-
-
-# os.chdir(os.getcwd()+'/assets')
-# imFileNames = filter_files(os.listdir())
-# print(imFileNames)
-
-# for i in range(len(imFileNames)):
-#     print("------------------", imFileNames[i])
-#     for j in range(len(imFileNames)):
-#         im1 = Image.open(imFileNames[i])
-#         im2 = Image.open(imFileNames[j])
-#         im1 , im2 = preHammingPrep1(im1,im2)
-#         print(imFileNames[i], imFileNames[j])
-#         print(compare_ssim(im1,im2))
-
-
-# def expCurveFunction(mean, segment):
-#       points = [] 
-#       y_sum = 0
-#       if segment == 0:
-#           return [],0
-#       for x in range(5,96,90//segment):
-#           y = mean * pow(np.exp(1), -(mean * x))
-#           points.append((x,y))
-#           y_sum += y
-#       return points,y_sum
-
-# im1, im2 = 0, 1
-# #rsp, av = calculateSimilarityScore(imFileNames[im1], imFileNames[im2], 'N', 300, 90)
-# rsp, av = calculateSimilarityScore(imFileNames[im1], imFileNames[im2], 'E', 0.3, 10)
-# plt.plot((*zip(*rsp)))
-# plt.show()
-
-
-# pts, y = normalCurveFunction(180, 90) # 20 - 1000
-# pts, y = expCurveFunction(0.3, 90) # 0.001 - 0.3
-# segment space 5 - 90
-# plt.plot(*zip(*pts))
-# print(y)
-# plt.show()
-
-
-# def indentifySimilarImages(imageList):
-#     npImageArrList = []
-#     for imageName in imageList:
-#         npImageArrList.append(np.array(Image.open(imageName)))
-
-
-
-# print(identifyExactDuplicates(imFileNames))
-
-# image = Image.open(imFileNames[0])
-# print(image.format, image.size, image.mode)
-# image = image.resize(getPercentOfImageSize(image, 20), resample=Image.LANCZOS)
-# npimage = np.array(image)
-# print(npimage)
-# image = image.convert('I')
-# image.show()
-
-# imshow(misc.imresize(im.imread(imFileNames[0]), (30, 30), interp='cubic'))
-# imshow(np.tile(np.arange(255), (255,1)))
