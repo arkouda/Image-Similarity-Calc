@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import multiprocessing
 from threading import Thread, Lock
 from helper import getPercentOfImageSize, filter_files, deleteFileFromDirectory
+from itertools import combinations # combinations(imfiles, 2)
 
 mutex = Lock()
 numberOfThreads = 20
@@ -34,16 +35,18 @@ def identifyExactDuplicates(imageList):
     duplicates = list(filter(lambda x: len(x) > 1, imageHashDict.values()))
     return duplicates
  
-def preHammingPrep1(image1, image2):
+def preProcessImage(image1, image2, maxImageSize = 300):
     resizeFactor = 0.3
     lowerBoundSize = (min(image1.size[0], image2.size[0]), min(image1.size[1], image2.size[1]))
     image1 = image1.resize(lowerBoundSize, resample=Image.LANCZOS)
     image2 = image2.resize(lowerBoundSize, resample=Image.LANCZOS)
-    image1 = image1.resize((int (lowerBoundSize[0]*resizeFactor), int (lowerBoundSize[1]*resizeFactor)), resample=Image.LANCZOS)
-    image2 = image2.resize((int (lowerBoundSize[0]*resizeFactor), int (lowerBoundSize[1]*resizeFactor)), resample=Image.LANCZOS)
+    if max(image1.size) > maxImageSize:
+        resizeFactor = maxImageSize / max(image1.size)
+        image1 = image1.resize((int (lowerBoundSize[0]*resizeFactor), int (lowerBoundSize[1]*resizeFactor)), resample=Image.LANCZOS)
+        image2 = image2.resize((int (lowerBoundSize[0]*resizeFactor), int (lowerBoundSize[1]*resizeFactor)), resample=Image.LANCZOS)
     return image1, image2
 
-def preHammingPrep2(image1, image2, resizeFactor):
+def hammingResize(image1, image2, resizeFactor):
     image1 = image1.resize(getPercentOfImageSize(image1, resizeFactor), resample=Image.LANCZOS)
     image2 = image2.resize(getPercentOfImageSize(image2, resizeFactor), resample=Image.LANCZOS)
     image1 = image1.convert('I')
@@ -54,7 +57,7 @@ def preHammingPrep2(image1, image2, resizeFactor):
 
 def getSSIMIndex(imageName1, imageName2, windowSize = 7):
     image1, image2 = Image.open(imageName1), Image.open(imageName2)
-    image1, image2 = preHammingPrep1(image1, image2)
+    image1, image2 = preProcessImage(image1, image2)
     image1, image2 = image1.convert('I'), image2.convert('I')
     dynamicRange = 255 #4294967295
     c1 = (dynamicRange * 0.01) ** 2
@@ -79,11 +82,11 @@ def getSSIMIndex(imageName1, imageName2, windowSize = 7):
 def getHammingSimilarityIndex(imName1, imName2):
     image1=Image.open(imName1)
     image2=Image.open(imName2)
-    image1, image2 = preHammingPrep1(image1, image2)
+    image1, image2 = preProcessImage(image1, image2)
     cumulativeSimilarityScore = 0
-    samplePts, sampleSum = normalCurveFunction(600, 10)
+    samplePts, sampleSum = normalCurveFunction(300, 10)
     for (resizeFactor, factorWeightage) in samplePts:
-        npImage1, npImage2 = preHammingPrep2(image1, image2, resizeFactor)
+        npImage1, npImage2 = hammingResize(image1, image2, resizeFactor)
         npGradient1 = np.diff(npImage1) > 1
         npGradient2 = np.diff(npImage2) > 1
         currentSimilarityScore = (np.count_nonzero(np.logical_not(np.logical_xor(npGradient1, npGradient2)))/npGradient1.size)
