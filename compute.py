@@ -113,7 +113,7 @@ def processingSimilarity(imFileNames, approach, threshold):
     if approach == 'N':
         for (im1,im2) in params:
             similarityTuple = getHammingSimilarityIndex(im1, im2)
-            imgTupleWithPercentList.append(similarityTuple)\
+            imgTupleWithPercentList.append(similarityTuple)
     elif approach == 'E':
         for (im1,im2) in params:
             similarityTuple = getSSIMIndex(im1, im2)
