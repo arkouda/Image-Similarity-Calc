@@ -1,17 +1,18 @@
 from tkinter import filedialog
 from tkinter import Tk, StringVar, IntVar, Label, Entry, Button, Spinbox, Radiobutton, mainloop
 import sys
+from PIL import Image 
 import datetime
 import matplotlib
 matplotlib.use('TkAgg')
 import compute
+import matplotlib.pyplot as plt
 
-def fun():
-    print(approachVar.get())
-    print("check")
+curr_pos = 0
 
 def checker():
-
+    global curr_pos
+    curr_pos = 0
     imFilePATH = folder_path.get()
 
     if approachVar.get() == 1:
@@ -34,13 +35,42 @@ def checker():
     print("Params: ", (imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag))
     startTime = datetime.datetime.now()
     print('START TIME: ' , startTime)
-    Finaljson = compute.driverFunction(imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag)
-    print(Finaljson)
+    results = compute.driverFunction(imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag)
+    print(results)
     print('END TIME: ' , datetime.datetime.now())
     print('DURATION TIME: ' , datetime.datetime.now() - startTime)
     
+    def key_event(e):
+        global curr_pos
+        if e.key == "right":
+            curr_pos = curr_pos + 1
+        elif e.key == "left":
+            curr_pos = curr_pos - 1
+        else:
+            return
+        curr_pos = curr_pos % len(results)
 
-    lbl_error.config(text=Finaljson)
+        ax1.cla()
+        ax2.cla()
+        ax1.imshow(Image.open(results[curr_pos][0]))
+        ax1.set_title(results[curr_pos][0]), ax1.set_xticks([]), ax1.set_yticks([])
+        ax2.imshow(Image.open(results[curr_pos][1]))
+        ax2.set_title(results[curr_pos][1]), ax2.set_xticks([]), ax2.set_yticks([])
+        plt.text(0.85, 0.5, str(results[curr_pos][2]) + '%')
+        fig.canvas.draw()
+
+    fig = plt.figure()
+    fig.canvas.mpl_connect('key_press_event', key_event)
+    ax1 = fig.add_subplot(121)
+    ax1.imshow(Image.open(results[curr_pos][0]))
+    ax1.set_title(results[curr_pos][0]), ax1.set_xticks([]), ax1.set_yticks([])
+    ax2 = fig.add_subplot(122)
+    ax2.imshow(Image.open(results[curr_pos][1]))
+    ax2.set_title(results[curr_pos][0]), ax2.set_xticks([]), ax2.set_yticks([])
+    plt.text(0.85, 0.5, str(results[curr_pos][2]) + '%')
+    plt.show()
+
+    # lbl_error.config(text=results)
 
 def browse_button():
     # Allow user to select a directory and store it in global var

@@ -35,3 +35,11 @@ def generateJsonWithThreshold(imgsWithPercentList, threshold):
             finalJSON[im2] = []
             finalJSON[im2].append([im1,percent])
     return finalJSON
+
+def filterByThreshold(imgsWithPercentList, threshold):
+    filteredList = []
+    for obj in imgsWithPercentList:
+        im1, im2 , percent = obj
+        if int(percent) >= threshold:
+            filteredList.append((im1, im2, percent))
+    return filteredList

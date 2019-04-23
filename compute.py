@@ -6,7 +6,7 @@ from hashlib import md5
 import matplotlib.pyplot as plt
 import multiprocessing
 from threading import Thread, Lock
-from helper import getPercentOfImageSize, filter_files, deleteFileFromDirectory, generateJsonWithThreshold
+from helper import getPercentOfImageSize, filter_files, deleteFileFromDirectory, generateJsonWithThreshold, filterByThreshold
 from itertools import combinations
 
 MAX_THREADS = 20
@@ -113,7 +113,7 @@ def processImagesWithMultiprocessing(imFileNames, approach, threshold):
             imgTupleWithPercentList = pool.starmap(getHammingSimilarityIndex, params)
         elif approach == 'E':
             imgTupleWithPercentList = pool.starmap(getSSIMIndex, params)
-    finalJSON = generateJsonWithThreshold(imgTupleWithPercentList,threshold)
+    finalJSON = filterByThreshold(imgTupleWithPercentList,threshold)
     return finalJSON
 
 def processSimilarity(imFileNames, approach, threshold):
@@ -129,7 +129,7 @@ def processSimilarity(imFileNames, approach, threshold):
             similarityTuple = getSSIMIndex(im1, im2)
             imgTupleWithPercentList.append(similarityTuple)
     
-    finalJSON = generateJsonWithThreshold(imgTupleWithPercentList, threshold)
+    finalJSON = filterByThreshold(imgTupleWithPercentList, threshold)
     return finalJSON
 
 def driverFunction(imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag):
