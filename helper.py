@@ -17,3 +17,21 @@ def getPercentOfImageSize(image, percent):
 def deleteFileFromDirectory(dir,images):
     for im in images:
         os.remove(dir+im)
+
+def generateJsonWithThreshold(imgsWithPercentList, threshold):
+    finalJSON = {}
+    for obj in imgsWithPercentList:
+        im1, im2 , percent = obj
+        if int(percent) <= threshold:
+            continue
+        if im1 in finalJSON:
+            finalJSON[im1].append([im2,percent])
+        else:
+            finalJSON[im1] = []
+            finalJSON[im1].append([im2,percent])
+        if im2 in finalJSON:
+            finalJSON[im2].append([im1,percent])
+        else:
+            finalJSON[im2] = []
+            finalJSON[im2].append([im1,percent])
+    return finalJSON

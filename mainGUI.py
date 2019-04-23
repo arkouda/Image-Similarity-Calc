@@ -31,7 +31,7 @@ def checker():
     else:
         fileDeleteFlag = 'NO'
 
-    print((imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag))
+    print("Params: ", (imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag))
     startTime = datetime.datetime.now()
     print('START TIME: ' , startTime)
     Finaljson = compute.driverFunction(imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag)
@@ -48,7 +48,6 @@ def browse_button():
     global folder_path
     filename = filedialog.askdirectory()
     folder_path.set(filename)
-    print(delete_dup)
 
 root = Tk()
 root.title("Image Similarity Calculator")
