@@ -1,11 +1,10 @@
 from tkinter import filedialog
 from tkinter import Tk, StringVar, IntVar, Label, Entry, Button, Spinbox, Radiobutton, mainloop
 import sys
-# sys.path.insert(0, '/home/shree/sem6/SE2')
 import datetime
 import matplotlib
 matplotlib.use('TkAgg')
-import main
+import compute
 
 def fun():
     print(approachVar.get())
@@ -35,17 +34,13 @@ def checker():
     print((imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag))
     startTime = datetime.datetime.now()
     print('START TIME: ' , startTime)
-    Finaljson = main.driverFunction(imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag)
+    Finaljson = compute.driverFunction(imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag)
     print(Finaljson)
     print('END TIME: ' , datetime.datetime.now())
     print('DURATION TIME: ' , datetime.datetime.now() - startTime)
     
 
     lbl_error.config(text=Finaljson)
-    
-    #lbl_error.config(text=approachVar.get())
-    #lbl_error.config(text=imFilePATH )
-    # lbl_error.config(text=j)
 
 def browse_button():
     # Allow user to select a directory and store it in global var
@@ -84,9 +79,6 @@ R1 = Radiobutton(root, text="Hamming", variable=approachVar, value=1)
 R1.place(x=150, y=90, width=90, height=25)
 R2 = Radiobutton(root, text="SSIM Index", variable=approachVar, value=2)
 R2.place(x=260, y=90, width=110, height=25)
-# R3 = Radiobutton(root, text="Low", variable=approachVar, value=3,command=fun)
-# R3.place(x=350, y=90, width=75, height=25)
-
 
 lbl_deldup = Label(root, text='Delete Duplicate')
 lbl_deldup.place(x=20, y=120, width=120, height=25)
@@ -94,7 +86,6 @@ Rb1 = Radiobutton(root, text="Yes", variable=delete_dup, value=1)
 Rb1.place(x=150, y=120, width=50, height=25)
 Rb2 = Radiobutton(root, text="No", variable=delete_dup, value=2)
 Rb2.place(x=210, y=120, width=50, height=25)
-
 
 lbl_multiprocessing = Label(root, text='Multiprocessing')
 lbl_multiprocessing.place(x=20, y=150, width=120, height=25)
@@ -107,7 +98,6 @@ button_browse = Button(text="Submit", command=checker)
 button_browse.place(x = 150, y = 180 , width=100, height=25)
 lbl_error = Label(root)
 lbl_error.place(x = 100, y=210, width = 200, height=25)
-
 
 approachVar.set(1)
 delete_dup.set(2)
