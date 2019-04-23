@@ -11,7 +11,6 @@ from itertools import combinations # combinations(imfiles, 2)
 
 mutex = Lock()
 numberOfThreads = 20
-imgTupleWithPercentList = []
 
 def normalCurveFunction(variance , segment):
     points = []
@@ -95,37 +94,33 @@ def getHammingSimilarityIndex(imName1, imName2):
     averageSimilarityScore = (cumulativeSimilarityScore / sampleSum) * 100
     return (imName1,imName2, round(averageSimilarityScore, 2))
 
-def processingImagesWithMultiprocessing(imFileNames, approach, threshold, imgTupleWithPercentList):
-    imgCount = len(imFileNames)
-    if imgCount < 1:
-        finalJSON = generatingJsonWithThreshold(imgTupleWithPercentList, threshold)
-        return finalJSON
-    params = [(imFileNames[0], imFileNames[im2])  for im2 in range(1,imgCount)] 
+def processingImagesWithMultiprocessing(imFileNames, approach, threshold):
+    params = combinations(imFileNames,2)
+    imgTupleWithPercentList = []
     with multiprocessing.Pool(processes=numberOfThreads) as pool:
         if approach == 'N':
-            similarityTupleList = pool.starmap(getHammingSimilarityIndex, params)
+            imgTupleWithPercentList = pool.starmap(getHammingSimilarityIndex, params)
         elif approach == 'E':
-            similarityTupleList = pool.starmap(getSSIMIndex, params)
-        imgTupleWithPercentList = imgTupleWithPercentList + similarityTupleList
-    print(similarityTupleList)
-    print(len(similarityTupleList))
-    return processingImagesWithMultiprocessing(imFileNames[1:], approach, threshold, imgTupleWithPercentList)
+            imgTupleWithPercentList = pool.starmap(getSSIMIndex, params)
+
+    finalJSON = generatingJsonWithThreshold(imgTupleWithPercentList,threshold)
+    return finalJSON
 
 def processingSimilarity(imFileNames, approach, threshold):
-    imgCount = len(imFileNames)
-    if imgCount < 1:
-        finalJSON = generatingJsonWithThreshold(imgTupleWithPercentList, threshold)
-        return finalJSON
-    if approach == 'N':
-        for im2 in range(1,imgCount):
-            similarityTuple = getHammingSimilarityIndex(imFileNames[0], imFileNames[im2])
-            imgTupleWithPercentList.append(similarityTuple)
-    elif approach == 'E':
-        for im2 in range(1,imgCount):
-            similarityTuple = getSSIMIndex(imFileNames[0], imFileNames[im2])
-            imgTupleWithPercentList.append(similarityTuple)
+    params = combinations(imFileNames,2)
+    imgTupleWithPercentList = []
 
-    return processingSimilarity(imFileNames[1:], approach, threshold)
+    if approach == 'N':
+        for (im1,im2) in params:
+            similarityTuple = getHammingSimilarityIndex(im1, im2)
+            imgTupleWithPercentList.append(similarityTuple)\
+    elif approach == 'E':
+        for (im1,im2) in params:
+            similarityTuple = getSSIMIndex(im1, im2)
+            imgTupleWithPercentList.append(similarityTuple)
+    
+    finalJSON = generatingJsonWithThreshold(imgTupleWithPercentList, threshold)
+    return finalJSON
 
 def generatingJsonWithThreshold(imgsWithPercentList, threshold):
     finalJSON = {}
@@ -155,6 +150,6 @@ def driverFunction(imFilePATH, approach, threshold, multiprocessingFlag, fileDel
     if multiprocessingFlag == 'OFF':
         finalJSON = processingSimilarity(imFileNames, approach, threshold)
     else:
-        finalJSON = processingImagesWithMultiprocessing(imFileNames, approach, threshold, imgTupleWithPercentList)
+        finalJSON = processingImagesWithMultiprocessing(imFileNames, approach, threshold)
         
     return finalJSON
