@@ -1,14 +1,51 @@
-# root.configure(background='light green') 
-from multiprocessing import Process, Queue, Pipe
 from tkinter import filedialog
 from tkinter import Tk, StringVar, IntVar, Label, Entry, Button, Spinbox, Radiobutton, mainloop
+import sys
+# sys.path.insert(0, '/home/shree/sem6/SE2')
+import datetime
+import matplotlib
+matplotlib.use('TkAgg')
+import main
 
 def fun():
     print(approachVar.get())
     print("check")
 
 def checker():
-    lbl_error.config(text="No Action")
+
+    imFilePATH = folder_path.get()
+
+    if approachVar.get() == 1:
+        approach = 'N' 
+    else:
+        approach = 'E'
+
+    if multiprocessingVar.get() == 1:
+        multiprocessingFlag = 'ON'
+    else: 
+        multiprocessingFlag = 'OFF'
+
+    threshold = int(Spinbox_thresh.get())
+
+    if delete_dup.get() == 1:
+        fileDeleteFlag = 'YES'
+    else:
+        fileDeleteFlag = 'NO'
+
+    print((imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag))
+    startTime = datetime.datetime.now()
+    print('START TIME: ' , startTime)
+    Finaljson = main.driverFunction(imFilePATH, approach, threshold, multiprocessingFlag, fileDeleteFlag)
+    print(Finaljson)
+    print('END TIME: ' , datetime.datetime.now())
+    print('DURATION TIME: ' , datetime.datetime.now() - startTime)
+    
+
+    lbl_error.config(text=Finaljson)
+    
+    #lbl_error.config(text=approachVar.get())
+    #lbl_error.config(text=imFilePATH )
+    # lbl_error.config(text=j)
 
 def browse_button():
     # Allow user to select a directory and store it in global var
@@ -20,12 +57,14 @@ def browse_button():
 
 root = Tk()
 root.title("Image Similarity Calculator")
-root.attributes('-notify', True)
+root.attributes('-alpha', True)
 root.geometry("700x300+30+30")
 
 folder_path = StringVar()
 delete_dup = IntVar()
 approachVar = IntVar()
+multiprocessingVar = IntVar()
+thresholdVar = IntVar()
 
 lbl_dir = Label(root, text='Directory')
 lbl_dir.place(x = 20, y = 30 , width=120, height=25)
@@ -36,17 +75,17 @@ button_browse.place(x = 280, y = 30 , width=120, height=25)
 
 lbl_thresh = Label(root, text='Threshold')
 lbl_thresh.place(x = 20, y = 60 , width=120, height=25)
-Spinbox_thresh = Spinbox(root, from_=0, to=100)
+Spinbox_thresh = Spinbox(root, from_=0, to=100 )
 Spinbox_thresh.place(x = 150, y = 60 , width=120, height=25)
 
 lbl_approach = Label(root, text='Calc Approach')
 lbl_approach.place(x = 20, y = 90, width=120, height=25)
-R1 = Radiobutton(root, text="Normal", variable=approachVar, value=1)
-R1.place(x=150, y=90, width=75, height=25)
-R2 = Radiobutton(root, text="Exponential", variable=approachVar, value=2)
-R2.place(x=235, y=90, width=120, height=25)
-R3 = Radiobutton(root, text="Low", variable=approachVar, value=3,command=fun)
-R3.place(x=350, y=90, width=75, height=25)
+R1 = Radiobutton(root, text="Hamming", variable=approachVar, value=1)
+R1.place(x=150, y=90, width=90, height=25)
+R2 = Radiobutton(root, text="SSIM Index", variable=approachVar, value=2)
+R2.place(x=260, y=90, width=110, height=25)
+# R3 = Radiobutton(root, text="Low", variable=approachVar, value=3,command=fun)
+# R3.place(x=350, y=90, width=75, height=25)
 
 
 lbl_deldup = Label(root, text='Delete Duplicate')
@@ -56,12 +95,21 @@ Rb1.place(x=150, y=120, width=50, height=25)
 Rb2 = Radiobutton(root, text="No", variable=delete_dup, value=2)
 Rb2.place(x=210, y=120, width=50, height=25)
 
+
+lbl_multiprocessing = Label(root, text='Multiprocessing')
+lbl_multiprocessing.place(x=20, y=150, width=120, height=25)
+Rb1 = Radiobutton(root, text="ON", variable=multiprocessingVar, value=1)
+Rb1.place(x=150, y=150, width=50, height=25)
+Rb2 = Radiobutton(root, text="OFF", variable=multiprocessingVar, value=2)
+Rb2.place(x=210, y=150, width=50, height=25)
+
 button_browse = Button(text="Submit", command=checker)
-button_browse.place(x = 150, y = 160 , width=100, height=25)
+button_browse.place(x = 150, y = 180 , width=100, height=25)
 lbl_error = Label(root)
-lbl_error.place(x = 100, y=200, width = 200, height=25)
+lbl_error.place(x = 100, y=210, width = 200, height=25)
 
 
 approachVar.set(1)
-delete_dup.set(1)
+delete_dup.set(2)
+multiprocessingVar.set(1)
 mainloop()
